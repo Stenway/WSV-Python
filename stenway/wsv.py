@@ -130,7 +130,7 @@ class WsvCharIterator(ReliableTxtCharIterator):
 	def readString(self):
 		chars = []
 		while True:
-			if self.isEndOfText() or self.isChar('\n'):
+			if self.isEndOfText() or self.isChar(0x0A):
 				raise self.getException("String not closed")
 			
 			c = self._chars[self._index]
@@ -462,8 +462,11 @@ class WsvSerializer:
 
 
 class WsvLine:
-	def __init__(self, values=[], whitespaces=None, comment=None):
-		self.values = values
+	def __init__(self, values=None, whitespaces=None, comment=None):
+		if values is None:
+			self.values = []
+		else:
+			self.values = values
 		self.setWhitespaces(whitespaces)
 		self.setComment(comment)
 	
@@ -517,11 +520,18 @@ class WsvLine:
 		else:
 			return WsvSerializer.serializeLineNonPreserving(self)
 	
+	def _set(self, values, whitespaces, comment):
+		self.values = values
+		self._whitespaces = whitespaces
+		self._comment = comment
 
 
 class WsvDocument:
-	def __init__(self, lines = [], encoding = ReliableTxtEncoding.UTF_8):
-		self.lines = lines
+	def __init__(self, lines = None, encoding = ReliableTxtEncoding.UTF_8):
+		if lines is None:
+			self.lines = []
+		else:
+			self.lines = lines
 		self.encoding = encoding
 	
 	def setEncoding(self, encoding):
